@@ -1,15 +1,19 @@
-staticSites:
-  - name: visor-cementerio
+services:
+  # Servicio 1: Frontend (Página Web Estática)
+  - type: web
+    name: visor-cementerio
+    env: static
     buildCommand: npm run build
-    publishPath: ./dist
+    staticPublishPath: ./dist
     branch: main
 
-services:
+  # Servicio 2: Backend (GeoServer con Docker)
   - type: web
     name: mi-geoserver
     env: docker
     dockerfilePath: ./geoserver/Dockerfile
     plan: starter # Necesario para tener al menos 512MB de RAM, aunque lo óptimo sería "standard"
+    branch: main
     envVars:
       - key: GEOSERVER_ADMIN_PASSWORD
         value: "myawesomegeoserver"
@@ -25,4 +29,4 @@ services:
       # - key: POSTGRES_USER
       #   value: "postgres"
       # - key: POSTGRES_PASSWORD
-      #   value: "तु_contraseña"
+      #   value: "tu_contraseña"
