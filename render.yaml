@@ -3,3 +3,26 @@ staticSites:
     buildCommand: npm run build
     publishPath: ./dist
     branch: main
+
+services:
+  - type: web
+    name: mi-geoserver
+    env: docker
+    dockerfilePath: ./geoserver/Dockerfile
+    plan: starter # Necesario para tener al menos 512MB de RAM, aunque lo óptimo sería "standard"
+    envVars:
+      - key: GEOSERVER_ADMIN_PASSWORD
+        value: "myawesomegeoserver"
+      - key: GEOSERVER_ADMIN_USER
+        value: "admin"
+      # Variables de conexión a base de datos de producción (Supabase)
+      # - key: POSTGRES_HOST
+      #   value: "tu-host-de-supabase.supabase.co"
+      # - key: POSTGRES_PORT
+      #   value: "5432"
+      # - key: POSTGRES_DB
+      #   value: "postgres"
+      # - key: POSTGRES_USER
+      #   value: "postgres"
+      # - key: POSTGRES_PASSWORD
+      #   value: "तु_contraseña"
