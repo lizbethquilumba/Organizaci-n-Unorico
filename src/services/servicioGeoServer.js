@@ -4,8 +4,8 @@
 
 // CONFIGURACIÓN
 // Si reinicias el túnel, SOLO CAMBIA ESTA LÍNEA con el nuevo enlace:
-const GEOSERVER_BASE_URL = 'http://localhost:8080/geoserver/otavalo_cementerio';
-//const GEOSERVER_BASE_URL = 'http://192.168.20.100:8080/geoserver/otavalo_cementerio';
+const GEOSERVER_BASE_URL = 'https://mi-geoserver.onrender.com/geoserver/otavalo_cementerio';
+//const GEOSERVER_BASE_URL = 'http://localhost:8080/geoserver/otavalo_cementerio';
 
 export const getGeoServerUrl = () => GEOSERVER_BASE_URL;
 
@@ -31,7 +31,7 @@ export const getSafeWfsUrl = (url) => {
     if (!url) return null;
     // Si la URL generada por OL ya empieza con nuestra GEOSERVER_URL, no hacemos nada.
     if (!url.startsWith(GEOSERVER_BASE_URL)) {
-        return url.replace(/http:\/\/localhost:8080\/geoserver/gi, GEOSERVER_BASE_URL);
+        return url.replace(/http:\/\/localhost:8080\/geoserver\/otavalo_cementerio/gi, GEOSERVER_BASE_URL);
     }
     return url;
 };
