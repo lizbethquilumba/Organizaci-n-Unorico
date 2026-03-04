@@ -47,7 +47,7 @@
 
 /* ETIQUETA BLOQUE (Floating) */
 .block-label {
-    position: absolute;
+    position: relative;
     background: white;
     padding: 12px 18px;
     min-width: 220px;
