@@ -504,9 +504,11 @@ const Sidebar = ({
           docParams.setTextColor(51, 51, 51);
           docParams.text('Calle Las Almas y Bolívar', pageWidth / 2, footerY + 20, { align: 'center' });
 
-          // Imagen Pie de página
+          // Imagen Pie de página (recortada empujándola hacia abajo para ocultar su texto original)
           try {
-            docParams.addImage(piedepaginaImg, 'PNG', 0, pageHeight - 15, pageWidth, 15);
+            // Bajamos la posición inicial en Y a pageHeight - 8 (casi al final)
+            // y aumentamos el alto a 25 para que crezca hacia abajo y se "corte" el texto de arriba
+            docParams.addImage(piedepaginaImg, 'PNG', 0, pageHeight - 8, pageWidth, 25);
           } catch (e) { }
         }
       };
