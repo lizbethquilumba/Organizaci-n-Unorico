@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Overlay from 'ol/Overlay';
 import { useMapContext } from '../../contexts/MapContext';
 
@@ -42,6 +43,10 @@ const MapaCementerio = ({
   const [etiquetaBloque, setEtiquetaBloque] = useState(null);
   const [mensajeNotificacion, setMensajeNotificacion] = useState(null); // { tipo: 'success'|'error'|'info', texto: '' }
 
+  // Overlays Elements for Portals
+  const [popupContainer, setPopupContainer] = useState(null);
+  const [labelContainer, setLabelContainer] = useState(null);
+
   // Helper para notificaciones con auto-ocultado
   const mostrarNotificacion = (mensaje) => {
     setMensajeNotificacion(mensaje);
@@ -59,12 +64,17 @@ const MapaCementerio = ({
 
   // 5. Setup Overlays
   useEffect(() => {
-    if (!map || !popupRef.current || !blockLabelRef.current) return;
+    if (!map) return;
 
-    // Create overlays only once
+    // Create container DOM nodes
+    const pContainer = document.createElement('div');
+    const lContainer = document.createElement('div');
+    setPopupContainer(pContainer);
+    setLabelContainer(lContainer);
+
     if (!popupOverlayRef.current) {
       popupOverlayRef.current = new Overlay({
-        element: popupRef.current,
+        element: pContainer,
         autoPan: false,
         positioning: 'bottom-center',
         stopEvent: false,
@@ -75,7 +85,7 @@ const MapaCementerio = ({
 
     if (!labelOverlayRef.current) {
       labelOverlayRef.current = new Overlay({
-        element: blockLabelRef.current,
+        element: lContainer,
         positioning: 'bottom-center',
         stopEvent: false,
         offset: [0, -18]
@@ -84,7 +94,9 @@ const MapaCementerio = ({
     }
 
     return () => {
-      // Cleanup handled by map removal mainly
+      // Cleanup
+      if (popupOverlayRef.current) map.removeOverlay(popupOverlayRef.current);
+      if (labelOverlayRef.current) map.removeOverlay(labelOverlayRef.current);
     };
   }, [map]);
 
@@ -170,18 +182,20 @@ const MapaCementerio = ({
         </div>
       )}
 
-      {/* Elementos DOM para Overlays */}
-      <div style={{ display: etiquetaBloque ? 'block' : 'none' }}>
-        <div ref={blockLabelRef}>
+      {/* Elementos DOM para Overlays usando Portales */}
+      {labelContainer && createPortal(
+        <div style={{ display: etiquetaBloque ? 'block' : 'none' }}>
           <BlockLabel etiqueta={etiquetaBloque} onClose={cerrarBloque} />
-        </div>
-      </div>
+        </div>,
+        labelContainer
+      )}
 
-      <div style={{ display: datosPopup ? 'block' : 'none' }}>
-        <div ref={popupRef}>
+      {popupContainer && createPortal(
+        <div style={{ display: datosPopup ? 'block' : 'none' }}>
           <NichePopup datos={datosPopup} onClose={cerrarNichoPopup} />
-        </div>
-      </div>
+        </div>,
+        popupContainer
+      )}
 
       <MapRotationControls
         onRotateLeft={handleRotateLeft}
