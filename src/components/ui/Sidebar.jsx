@@ -416,14 +416,23 @@ const Sidebar = ({
         let ocup = 0, mant = 0;
 
         if (codigosFisicos.length > 0) {
-          // Dividir en chunks si son muchos (Supabase admite ~65k params, pero mejor ser prudentes)
-          // Para un bloque de ~100-200 nichos, una sola query está bien.
-          const { data: nichosAdmin } = await supabase
-            .from('nichos')
-            .select('codigo, estado')
-            .in('codigo', codigosFisicos);
+          // Dividir en chunks si son muchos (evita error 414 URI Too Long en Supabase GET)
+          let nichosAdmin = [];
+          const chunkSize = 40;
 
-          if (nichosAdmin && nichosAdmin.length > 0) {
+          for (let i = 0; i < codigosFisicos.length; i += chunkSize) {
+            const chunk = codigosFisicos.slice(i, i + chunkSize);
+            const { data } = await supabase
+              .from('nichos')
+              .select('codigo, estado')
+              .in('codigo', chunk);
+
+            if (data) {
+              nichosAdmin = nichosAdmin.concat(data);
+            }
+          }
+
+          if (nichosAdmin.length > 0) {
             ocup = nichosAdmin.filter(n =>
               n.estado?.toUpperCase() === 'OCUPADO' ||
               n.estado?.toUpperCase().includes('OCUP')
