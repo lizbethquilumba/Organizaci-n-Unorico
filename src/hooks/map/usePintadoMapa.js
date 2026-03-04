@@ -95,7 +95,7 @@ export const usePintadoMapa = (map, isInitialized, estadosVisibles, sourceEstado
                     });
 
                     if (data && data.features) {
-                        const features = new GeoJSON().readFeatures(data, { dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857' });
+                        const features = new GeoJSON().readFeatures(data, { dataProjection: 'EPSG:3857', featureProjection: 'EPSG:3857' });
                         // Filtrar contra la lista de conflictos (si un ID también está en admin Ocupado)
                         const featuresVerdes = features.filter(f => {
                             const c = f.get('codigo') || f.get('CODIGO');
@@ -124,7 +124,7 @@ export const usePintadoMapa = (map, isInitialized, estadosVisibles, sourceEstado
                         });
 
                         if (data && data.features) {
-                            const features = new GeoJSON().readFeatures(data, { dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857' });
+                            const features = new GeoJSON().readFeatures(data, { dataProjection: 'EPSG:3857', featureProjection: 'EPSG:3857' });
                             procesarFeatures(features);
                         }
                     };

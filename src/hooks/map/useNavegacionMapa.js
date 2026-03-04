@@ -36,7 +36,7 @@ export const useNavegacionMapa = ({
 
             if (data && data.features?.length) {
                 // CASO A: Nicho existe en el mapa
-                const features = new GeoJSON().readFeatures(data, { featureProjection: 'EPSG:3857' });
+                const features = new GeoJSON().readFeatures(data, { dataProjection: 'EPSG:3857', featureProjection: 'EPSG:3857' });
                 sourceResaltado.clear();
                 sourceResaltado.addFeatures(features);
 
@@ -93,7 +93,7 @@ export const useNavegacionMapa = ({
                             });
 
                             if (dataBloque && dataBloque.features?.length) {
-                                const featuresB = new GeoJSON().readFeatures(dataBloque, { featureProjection: 'EPSG:3857' });
+                                const featuresB = new GeoJSON().readFeatures(dataBloque, { dataProjection: 'EPSG:3857', featureProjection: 'EPSG:3857' });
 
                                 // Usamos sourceBloque para resaltar el bloque, no el nicho
                                 sourceBloque?.clear();
@@ -141,7 +141,7 @@ export const useNavegacionMapa = ({
             });
 
             if (data && data.features?.length) {
-                const features = new GeoJSON().readFeatures(data, { featureProjection: 'EPSG:3857' });
+                const features = new GeoJSON().readFeatures(data, { dataProjection: 'EPSG:3857', featureProjection: 'EPSG:3857' });
                 sourceSector.clear();
                 sourceSector.addFeatures(features);
 
@@ -183,7 +183,7 @@ export const useNavegacionMapa = ({
             });
 
             if (data && data.features?.length) {
-                const features = new GeoJSON().readFeatures(data, { featureProjection: 'EPSG:3857' });
+                const features = new GeoJSON().readFeatures(data, { dataProjection: 'EPSG:3857', featureProjection: 'EPSG:3857' });
                 sourceBloque.clear();
                 sourceBloque.addFeatures(features);
 
