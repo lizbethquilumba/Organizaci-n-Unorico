@@ -38,3 +38,7 @@ services:
       #   value: "postgres"
       # - key: POSTGRES_PASSWORD
       #   value: "tu_contraseña"
+    disk:
+      name: geoserver-data
+      mountPath: /opt/geoserver/data_dir
+      sizeGB: 1
