@@ -19,6 +19,9 @@ services:
         value: "myawesomegeoserver"
       - key: GEOSERVER_ADMIN_USER
         value: "admin"
+      # Permitir que GeoServer acepte formularios detrás del proxy de Render
+      - key: GEOSERVER_CSRF_WHITELIST
+        value: "mi-geoserver.onrender.com"
       # Variables de conexión a base de datos de producción (Supabase)
       # - key: POSTGRES_HOST
       #   value: "tu-host-de-supabase.supabase.co"
