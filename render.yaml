@@ -22,6 +22,11 @@ services:
       # Permitir que GeoServer acepte formularios detrás del proxy de Render
       - key: GEOSERVER_CSRF_WHITELIST
         value: "mi-geoserver.onrender.com"
+      # Habilitar CORS para que la web frontend (visor-cementerio) pueda cargar mapas
+      - key: CORS_ENABLED
+        value: "true"
+      - key: CORS_ALLOWED_ORIGINS
+        value: "*"
       # Variables de conexión a base de datos de producción (Supabase)
       # - key: POSTGRES_HOST
       #   value: "tu-host-de-supabase.supabase.co"
