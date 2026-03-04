@@ -157,6 +157,18 @@ const MapaCementerio = ({
     if (typeof setSelectedBloque === 'function') setSelectedBloque(null);
     if (typeof alDeseleccionarBloque === 'function') alDeseleccionarBloque();
     try { window.dispatchEvent(new CustomEvent('deseleccionarBloque')); } catch (e) { }
+
+    // Resetear mapa a la vista original
+    if (map) {
+      import('ol/proj').then(({ fromLonLat }) => {
+        map.getView().animate({
+          center: fromLonLat([-78.26549, 0.21908]),
+          zoom: 19,
+          rotation: 0.34,
+          duration: 1000
+        });
+      });
+    }
   };
 
   const handleRotateLeft = () => {
