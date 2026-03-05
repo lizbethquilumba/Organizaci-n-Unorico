@@ -59,9 +59,9 @@ export const useNavegacionMapa = ({
                 // ZOOM INTELIGENTE: Si ya está cerca, solo mover centro. Si está lejos, hacer zoom.
                 if (currentZoom > 20) {
                     const center = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
-                    map.getView().animate({ center: center, duration: 800 });
+                    map.getView().animate({ center: center, duration: 1500 });
                 } else {
-                    map.getView().fit(extent, { duration: 1000, maxZoom: 21, padding: [100, 100, 100, 100] });
+                    map.getView().fit(extent, { duration: 1800, maxZoom: 21, padding: [100, 100, 100, 100] });
                 }
 
                 // Update Popup if needed
@@ -110,7 +110,7 @@ export const useNavegacionMapa = ({
                                 sourceBloque?.addFeatures(featuresB);
 
                                 const extentB = featuresB[0].getGeometry().getExtent();
-                                map.getView().fit(extentB, { duration: 1000, maxZoom: 20, padding: [80, 80, 80, 80] });
+                                map.getView().fit(extentB, { duration: 1800, maxZoom: 20, padding: [80, 80, 80, 80] });
 
                                 // Mostrar etiqueta de bloque
                                 if (onUpdateBlockLabel) {
@@ -161,7 +161,7 @@ export const useNavegacionMapa = ({
                     import('ol/extent').then(({ extend }) => extend(extent, e));
                 });
 
-                map.getView().fit(extent, { duration: 1000, maxZoom: 19, padding: [50, 50, 50, 50] });
+                map.getView().fit(extent, { duration: 1800, maxZoom: 19, padding: [50, 50, 50, 50] });
             }
         };
         doZoomSector();

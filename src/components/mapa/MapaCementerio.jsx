@@ -170,7 +170,7 @@ const MapaCementerio = ({
           center: fromLonLat([-78.26549, 0.21908]),
           zoom: 19,
           rotation: 0.34,
-          duration: 1000
+          duration: 1800
         });
       });
     }
