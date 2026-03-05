@@ -219,7 +219,7 @@ const Sidebar = ({
 
     let querySocios = supabase
       .from('socios')
-      .select(`id, nombres, apellidos, cedula, socio_nicho ( nichos ( codigo, fallecido_nicho ( fallecidos ( nombres, apellidos ) ) ) )`);
+      .select(`id, nombres, apellidos, cedula, socio_nicho ( nichos ( codigo, fallecido_nicho ( fallecidos ( nombres, apellidos ) ) ) ), nichos ( codigo, fallecido_nicho ( fallecidos ( nombres, apellidos ) ) )`);
 
     terminos.forEach(term => {
       const filtro = `nombres.ilike.%${term}%,apellidos.ilike.%${term}%,cedula.ilike.%${term}%`;
@@ -258,7 +258,20 @@ const Sidebar = ({
     });
 
     const hitsSocios = (resSocios.data || []).flatMap(d => {
-      const nichos = d.socio_nicho || [];
+      const nichosDirectos = (d.nichos || []).map(n => ({ nichos: n }));
+      const nichosIntermedios = d.socio_nicho || [];
+      const nichosArr = [...nichosDirectos, ...nichosIntermedios];
+
+      // Eliminar duplicados si el nicho sale en los dos lados (basado en el código)
+      const codigosVistos = new Set();
+      const nichos = nichosArr.filter(n => {
+        const cod = n.nichos?.codigo;
+        if (!cod) return false;
+        if (codigosVistos.has(cod)) return false;
+        codigosVistos.add(cod);
+        return true;
+      });
+
       if (nichos.length === 0) return [{
         id: `S-${d.id}`, tipo: 'Socio', nombre: `${d.nombres} ${d.apellidos}`, cedula: d.cedula, codigo: null
       }];
@@ -328,7 +341,7 @@ const Sidebar = ({
 
     const [resFExacta, resSExacta] = await Promise.all([
       buscarFallecidos ? supabase.from('fallecidos').select(`id, fallecido_nicho ( nichos ( codigo ) )`).eq('cedula', busqueda).maybeSingle() : Promise.resolve({ data: null, error: null }),
-      buscarSocios ? supabase.from('socios').select(`id, socio_nicho ( nichos ( codigo ) )`).eq('cedula', busqueda).maybeSingle() : Promise.resolve({ data: null, error: null })
+      buscarSocios ? supabase.from('socios').select(`id, socio_nicho ( nichos ( codigo ) ), nichos ( codigo )`).eq('cedula', busqueda).maybeSingle() : Promise.resolve({ data: null, error: null })
     ]);
 
     // Verificamos si hay múltiples nichos para la coincidencia exacta
@@ -343,7 +356,17 @@ const Sidebar = ({
     }
 
     if (resSExacta.data) {
-      const nichos = resSExacta.data.socio_nicho || [];
+      const nichosDirectos = (resSExacta.data.nichos || []).map(n => ({ nichos: n }));
+      const nichosIntermedios = resSExacta.data.socio_nicho || [];
+      const nichosArr = [...nichosDirectos, ...nichosIntermedios];
+
+      const codigosVistos = new Set();
+      const nichos = nichosArr.filter(n => {
+        const cod = n.nichos?.codigo;
+        if (!cod || codigosVistos.has(cod)) return false;
+        codigosVistos.add(cod);
+        return true;
+      });
       if (nichos.length === 1 && nichos[0].nichos?.codigo) {
         navegarANicho(nichos[0].nichos.codigo); return;
       } else if (nichos.length > 1) {
@@ -354,7 +377,7 @@ const Sidebar = ({
 
     const terminos = busqueda.split(' ').filter(t => t.trim().length > 0);
     let qF = supabase.from('fallecidos').select(`id, nombres, apellidos, fallecido_nicho ( nichos ( codigo ), socios ( nombres, apellidos ) )`);
-    let qS = supabase.from('socios').select(`id, nombres, apellidos, socio_nicho ( nichos ( codigo ) )`);
+    let qS = supabase.from('socios').select(`id, nombres, apellidos, socio_nicho ( nichos ( codigo ) ), nichos ( codigo )`);
 
     terminos.forEach(term => {
       const filtro = `nombres.ilike.%${term}%,apellidos.ilike.%${term}%,cedula.ilike.%${term}%`;
@@ -368,12 +391,12 @@ const Sidebar = ({
     ]);
 
     const validosF = (rf.data || []).filter(d => d.fallecido_nicho?.length > 0);
-    const validosS = (rs.data || []).filter(d => d.socio_nicho?.length > 0);
+    const validosS = (rs.data || []).filter(d => (d.socio_nicho?.length > 0 || d.nichos?.length > 0));
     const totalEncontrados = validosF.length + validosS.length;
 
     if (totalEncontrados === 1) {
       const unico = validosF[0] || validosS[0];
-      const nichoArr = unico.fallecido_nicho || unico.socio_nicho;
+      const nichoArr = unico.fallecido_nicho || unico.socio_nicho || (unico.nichos ? unico.nichos.map(n => ({ nichos: n })) : []);
       navegarANicho(nichoArr[0].nichos.codigo);
     } else if (totalEncontrados > 1) {
       setMensajeBusqueda({ tipo: 'warning', texto: 'Múltiples resultados. Seleccione de la lista.' });
