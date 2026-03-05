@@ -50,46 +50,85 @@ export const getNichoEstadoAdmin = async (codigo) => {
 export const getDifuntosByNichoCodigo = async (codigo) => {
     if (!codigo) return [];
 
-    // 1. Buscar ID del nicho + socio responsable (titular del nicho)
-    let { data: nAdmin, error: errN } = await supabase
+    // PASO 1: Obtener id y socio_id del nicho
+    let { data: nichoRow } = await supabase
         .from('nichos')
-        .select('id, socios(nombres, apellidos)')
+        .select('id, socio_id')
         .eq('codigo', codigo)
         .maybeSingle();
 
-    if (!nAdmin) {
-        const { data: nLike } = await supabase
+    // Fallback con ilike si el código tiene variaciones de mayúsculas
+    if (!nichoRow) {
+        const { data: rows } = await supabase
             .from('nichos')
-            .select('id, socios(nombres, apellidos)')
+            .select('id, socio_id')
             .ilike('codigo', codigo)
             .limit(1);
-        if (nLike && nLike.length > 0) nAdmin = nLike[0];
+        if (rows && rows.length > 0) nichoRow = rows[0];
     }
 
-    if (!nAdmin) return [];
+    if (!nichoRow) return [];
 
-    const responsableNombre = nAdmin.socios
-        ? `${nAdmin.socios.nombres} ${nAdmin.socios.apellidos}`
-        : 'No definido';
+    // PASO 2: Obtener nombre del responsable (socio) por su ID
+    let responsableNombre = 'No definido';
+    if (nichoRow.socio_id) {
+        const { data: socioRow } = await supabase
+            .from('socios')
+            .select('nombres, apellidos')
+            .eq('id', nichoRow.socio_id)
+            .maybeSingle();
+        if (socioRow) {
+            responsableNombre = `${socioRow.nombres} ${socioRow.apellidos}`;
+        }
+    }
 
-    // 2. Buscar difuntos asociados a este nicho (sin filtrar por fecha_exhumacion)
-    const { data: rel, error: errRel } = await supabase
+    // PASO 3: Obtener filas de fallecido_nicho para este nicho
+    const { data: relRows, error: errRel } = await supabase
         .from('fallecido_nicho')
-        .select(`fallecidos (nombres, apellidos, fecha_fallecimiento)`)
-        .eq('nicho_id', nAdmin.id)
+        .select('fallecido_id, socio_id')
+        .eq('nicho_id', nichoRow.id)
         .order('created_at', { ascending: false });
 
     if (errRel) {
-        console.error("Error buscando difuntos:", errRel);
+        console.error("Error buscando fallecido_nicho:", errRel);
         return [];
     }
 
-    // 3. Mapear difuntos con el responsable del nicho
-    return (rel || []).map(d => ({
-        nombre: d.fallecidos ? `${d.fallecidos.nombres} ${d.fallecidos.apellidos}` : 'Desconocido',
-        responsable: responsableNombre
-    }));
+    if (!relRows || relRows.length === 0) return [];
+
+    // PASO 4: Obtener datos de cada fallecido y su responsable específico
+    const difuntos = [];
+    for (const rel of relRows) {
+        if (!rel.fallecido_id) continue;
+
+        const { data: fallecido } = await supabase
+            .from('fallecidos')
+            .select('nombres, apellidos')
+            .eq('id', rel.fallecido_id)
+            .maybeSingle();
+
+        // Responsable: primero el del registro fallecido_nicho, si no el del nicho
+        let respNombre = responsableNombre;
+        if (rel.socio_id) {
+            const { data: socioRel } = await supabase
+                .from('socios')
+                .select('nombres, apellidos')
+                .eq('id', rel.socio_id)
+                .maybeSingle();
+            if (socioRel) respNombre = `${socioRel.nombres} ${socioRel.apellidos}`;
+        }
+
+        if (fallecido) {
+            difuntos.push({
+                nombre: `${fallecido.nombres} ${fallecido.apellidos}`,
+                responsable: respNombre
+            });
+        }
+    }
+
+    return difuntos;
 };
+
 
 
 /**
