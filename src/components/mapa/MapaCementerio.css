@@ -285,6 +285,19 @@
     color: #422006 !important;
 }
 
+/* Estados reales de la BD */
+.state-bueno {
+    background-color: #3b82f6;
+}
+
+.state-malo {
+    background-color: #991b1b;
+}
+
+.state-abandonado {
+    background-color: #9333ea;
+}
+
 .state- {
     background-color: #94a3b8;
 }
