@@ -38,6 +38,12 @@ const Sidebar = ({
   const [dropdownBloqueOpen, setDropdownBloqueOpen] = useState(false);
   const bloqueDropdownRef = useRef(null);
 
+  const [dropdownSectorFiltroOpen, setDropdownSectorFiltroOpen] = useState(false);
+  const sectorFiltroRef = useRef(null);
+
+  const [dropdownSectorReporteOpen, setDropdownSectorReporteOpen] = useState(false);
+  const sectorReporteRef = useRef(null);
+
   const [capasVisibles, setCapasVisibles] = useState({
     'cementerio_general': true,
     'infraestructura': true,
@@ -52,6 +58,12 @@ const Sidebar = ({
     const handleClickOutside = (e) => {
       if (bloqueDropdownRef.current && !bloqueDropdownRef.current.contains(e.target)) {
         setDropdownBloqueOpen(false);
+      }
+      if (sectorFiltroRef.current && !sectorFiltroRef.current.contains(e.target)) {
+        setDropdownSectorFiltroOpen(false);
+      }
+      if (sectorReporteRef.current && !sectorReporteRef.current.contains(e.target)) {
+        setDropdownSectorReporteOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -762,21 +774,47 @@ const Sidebar = ({
         <section className="sidebar-section">
           <h3 className="section-title"><Grid3X3 size={14} /> Filtrar por Bloque</h3>
 
-          <select
-            value={sectorFiltro}
-            onChange={(e) => {
-              const sec = e.target.value;
-              setSectorFiltro(sec);
-              setBloqueActual(''); // Resetear bloque al cambiar sector
-              alSeleccionarBloque(null);
-              if (alSeleccionarSector) alSeleccionarSector(sec);
-            }}
-            className="form-select"
-            style={{ marginBottom: '0.5rem' }}
-          >
-            <option value="">-- Seleccione un sector --</option>
-            {sectores.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
+          {/* Custom dropdown para sector filtro - siempre abre hacia abajo */}
+          <div className="custom-select-wrapper" ref={sectorFiltroRef} style={{ marginBottom: '0.5rem' }}>
+            <div
+              className="form-select custom-select-trigger"
+              onClick={() => setDropdownSectorFiltroOpen(o => !o)}
+            >
+              <span>{sectorFiltro || '-- Seleccione un sector --'}</span>
+              <span className="custom-select-arrow">{dropdownSectorFiltroOpen ? '▲' : '▼'}</span>
+            </div>
+            {dropdownSectorFiltroOpen && (
+              <div className="custom-select-options">
+                <div
+                  className="custom-select-option"
+                  onClick={() => {
+                    setSectorFiltro('');
+                    setBloqueActual('');
+                    alSeleccionarBloque(null);
+                    if (alSeleccionarSector) alSeleccionarSector('');
+                    setDropdownSectorFiltroOpen(false);
+                  }}
+                >
+                  -- Seleccione un sector --
+                </div>
+                {sectores.map(s => (
+                  <div
+                    key={s}
+                    className={`custom-select-option${s === sectorFiltro ? ' selected' : ''}`}
+                    onClick={() => {
+                      setSectorFiltro(s);
+                      setBloqueActual('');
+                      alSeleccionarBloque(null);
+                      if (alSeleccionarSector) alSeleccionarSector(s);
+                      setDropdownSectorFiltroOpen(false);
+                    }}
+                  >
+                    {s}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Custom dropdown para bloques - siempre abre hacia abajo */}
           {(() => {
@@ -826,10 +864,41 @@ const Sidebar = ({
 
         <section className="sidebar-section">
           <h3 className="section-title"><FileText size={14} /> Reporte por Sector</h3>
-          <select value={sectorSeleccionado} onChange={(e) => setSectorSeleccionado(e.target.value)} className="form-select" style={{ marginBottom: '0.5rem' }}>
-            <option value="">-- Seleccione un sector --</option>
-            {sectores.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
+          {/* Custom dropdown para sector reporte - siempre abre hacia abajo */}
+          <div className="custom-select-wrapper" ref={sectorReporteRef} style={{ marginBottom: '0.5rem' }}>
+            <div
+              className="form-select custom-select-trigger"
+              onClick={() => setDropdownSectorReporteOpen(o => !o)}
+            >
+              <span>{sectorSeleccionado || '-- Seleccione un sector --'}</span>
+              <span className="custom-select-arrow">{dropdownSectorReporteOpen ? '▲' : '▼'}</span>
+            </div>
+            {dropdownSectorReporteOpen && (
+              <div className="custom-select-options">
+                <div
+                  className="custom-select-option"
+                  onClick={() => {
+                    setSectorSeleccionado('');
+                    setDropdownSectorReporteOpen(false);
+                  }}
+                >
+                  -- Seleccione un sector --
+                </div>
+                {sectores.map(s => (
+                  <div
+                    key={s}
+                    className={`custom-select-option${s === sectorSeleccionado ? ' selected' : ''}`}
+                    onClick={() => {
+                      setSectorSeleccionado(s);
+                      setDropdownSectorReporteOpen(false);
+                    }}
+                  >
+                    {s}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           {sectorSeleccionado && (
             <div className="blocks-list">
               <div className="block-actions">
