@@ -50,10 +50,10 @@ export const getNichoEstadoAdmin = async (codigo) => {
 export const getDifuntosByNichoCodigo = async (codigo) => {
     if (!codigo) return [];
 
-    // PASO 1: Obtener id y socio_id del nicho
+    // PASO 1: Obtener identificacion y socio_id del nicho
     let { data: nichoRow } = await supabase
         .from('nichos')
-        .select('id, socio_id')
+        .select('identificacion, socio_id')
         .eq('codigo', codigo)
         .maybeSingle();
 
@@ -61,7 +61,7 @@ export const getDifuntosByNichoCodigo = async (codigo) => {
     if (!nichoRow) {
         const { data: rows } = await supabase
             .from('nichos')
-            .select('id, socio_id')
+            .select('identificacion, socio_id')
             .ilike('codigo', codigo)
             .limit(1);
         if (rows && rows.length > 0) nichoRow = rows[0];
@@ -78,7 +78,7 @@ export const getDifuntosByNichoCodigo = async (codigo) => {
         const { data: snRows } = await supabase
             .from('socio_nicho')
             .select('socio_id')
-            .eq('nicho_id', nichoRow.id)
+            .eq('nicho_id', nichoRow.identificacion)
             .limit(1);
         if (snRows && snRows.length > 0) {
             targetSocioId = snRows[0].socio_id;
@@ -100,7 +100,7 @@ export const getDifuntosByNichoCodigo = async (codigo) => {
     const { data: relRows, error: errRel } = await supabase
         .from('fallecido_nicho')
         .select('fallecido_id, socio_id')
-        .eq('nicho_id', nichoRow.id)
+        .eq('nicho_id', nichoRow.identificacion)
         .order('created_at', { ascending: false });
 
     if (errRel) {
