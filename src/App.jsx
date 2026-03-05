@@ -16,6 +16,7 @@ function App() {
 
   const [estadosVisibles, setEstadosVisibles] = useState([]);
   const [menuAbierto, setMenuAbierto] = useState(false);
+  const [nichoExternoData, setNichoExternoData] = useState(null);
 
   const listaCapas = [
     { id: 'cementerio_general', nombre: 'Límites del Cementerio' },
@@ -64,6 +65,7 @@ function App() {
           className="sidebar-componente-interno"
           estadosSeleccionados={estadosVisibles}
           alCambiarEstados={setEstadosVisibles}
+          alActualizarPopupExterno={(datos) => setNichoExternoData(datos)}
         />
       </div>
 
@@ -74,6 +76,8 @@ function App() {
           sectorSeleccionado={sectorSeleccionado} // Nuevo prop
           capasVisiblesEstado={configuracionCapas}
           estadosVisibles={estadosVisibles}
+          nichoExternoData={nichoExternoData}
+          onNichoExternoUsado={() => setNichoExternoData(null)}
           alDeseleccionarNicho={() => setNichoABuscar({ codigo: null, ts: Date.now() })}
           alDeseleccionarBloque={() => setBloqueSeleccionado(null)}
         />

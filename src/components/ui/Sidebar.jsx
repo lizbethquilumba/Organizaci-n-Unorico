@@ -16,7 +16,8 @@ const Sidebar = ({
   capasConfig = [],
   className = '',
   estadosSeleccionados = [],
-  alCambiarEstados
+  alCambiarEstados,
+  alActualizarPopupExterno
 }) => {
   // --- ESTADOS ---
   const [busqueda, setBusqueda] = useState('');
@@ -293,6 +294,13 @@ const Sidebar = ({
 
   const seleccionarResultado = (item) => {
     if (item.codigo) {
+      // Pasar datos pre-fetched al popup directamente
+      if (alActualizarPopupExterno) {
+        const difuntos = item.tipo === 'Difunto'
+          ? [{ nombre: item.nombre, responsable: item.responsable || 'No definido' }]
+          : [];
+        alActualizarPopupExterno({ codigo: item.codigo, difuntos, _prefetched: true });
+      }
       alBuscar(item.codigo);
     } else {
       setMensajeBusqueda({ tipo: 'warning', texto: `${item.tipo} sin nicho asignado` });

@@ -24,6 +24,8 @@ const MapaCementerio = ({
   sectorSeleccionado,
   capasVisiblesEstado,
   estadosVisibles,
+  nichoExternoData,
+  onNichoExternoUsado,
   alDeseleccionarNicho,
   alDeseleccionarBloque
 }) => {
@@ -136,7 +138,9 @@ const MapaCementerio = ({
     onUpdateBlockLabel: setEtiquetaBloque,
     onShowNotification: mostrarNotificacion,
     popupOverlay: popupOverlayRef.current,
-    labelOverlay: labelOverlayRef.current
+    labelOverlay: labelOverlayRef.current,
+    nichoExternoData,
+    onNichoExternoUsado
   });
 
   // UI Handlers

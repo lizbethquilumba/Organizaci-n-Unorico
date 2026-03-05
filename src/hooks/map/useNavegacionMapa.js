@@ -14,12 +14,25 @@ export const useNavegacionMapa = ({
     sourceResaltado,
     sourceBloque,
     sourceSector,
-    onUpdatePopup, // callback para poner datos en el popup tras zoom (si aplica)
-    onUpdateBlockLabel, // callback para poner etiqueta bloque
-    onShowNotification, // callback para notificaciones
+    onUpdatePopup,
+    onUpdateBlockLabel,
+    onShowNotification,
     popupOverlay,
-    labelOverlay
+    labelOverlay,
+    nichoExternoData,
+    onNichoExternoUsado
 }) => {
+
+    // Helper: merge pre-fetched difuntos if available for this nicho
+    const mergeConDatosExternos = (datosCompletos, codigo) => {
+        if (nichoExternoData && nichoExternoData._prefetched &&
+            nichoExternoData.codigo === codigo &&
+            nichoExternoData.difuntos?.length > 0) {
+            if (onNichoExternoUsado) onNichoExternoUsado();
+            return { ...datosCompletos, difuntos: nichoExternoData.difuntos };
+        }
+        return datosCompletos;
+    };
 
     // ZOOM NICHO
     useEffect(() => {
@@ -54,7 +67,8 @@ export const useNavegacionMapa = ({
                 // Update Popup if needed
                 const props = features[0].getProperties();
                 const datosCompletos = await obtenerDatosCompletoNicho(props);
-                if (onUpdatePopup) onUpdatePopup(datosCompletos);
+                const datosFinal = mergeConDatosExternos(datosCompletos, codigo);
+                if (onUpdatePopup) onUpdatePopup(datosFinal);
 
                 // Position Overlay
                 if (popupOverlay) {
@@ -83,7 +97,8 @@ export const useNavegacionMapa = ({
 
                         // Obtener datos completos para el popup (aunque no haya geometría)
                         const datosCompletos = await obtenerDatosCompletoNicho({ codigo });
-                        if (onUpdatePopup) onUpdatePopup(datosCompletos);
+                        const datosFinal = mergeConDatosExternos(datosCompletos, codigo);
+                        if (onUpdatePopup) onUpdatePopup(datosFinal);
 
                         // Buscar geometría del Bloque
                         if (codigoBloque) {
