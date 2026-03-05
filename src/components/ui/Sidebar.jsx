@@ -284,14 +284,10 @@ const Sidebar = ({
           } : null
         ).filter(Boolean);
 
-        const infoExtra = difuntosLista.length > 0
-          ? ` - Difunto(s): ${difuntosLista.map(x => x.nombre).join(', ')}`
-          : '';
-
         return {
           id: `S-${d.id}-${i}`,
           tipo: 'Socio',
-          nombre: `${d.nombres} ${d.apellidos}${infoExtra}`,
+          nombre: `${d.nombres} ${d.apellidos}`,
           cedula: d.cedula,
           codigo: n.nichos?.codigo,
           responsable: `${d.nombres} ${d.apellidos}`,
@@ -729,9 +725,34 @@ const Sidebar = ({
           {resultados.length > 0 && (
             <ul className="search-results">
               {resultados.map(item => (
-                <li key={item.id} onClick={() => seleccionarResultado(item)} className="search-item">
-                  <span className="item-name">{item.nombre}</span>
-                  {/* Vista simplificada */}
+                <li key={item.id} onClick={() => seleccionarResultado(item)} className="search-item" style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '8px 12px', borderBottom: '1px solid #edf2f7', cursor: 'pointer' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span className="item-name" style={{ fontWeight: 'bold', color: '#2d3748' }}>
+                      {item.tipo === 'Socio' ? '👤 ' : '✝ '}{item.nombre}
+                    </span>
+                    {item.codigo && (
+                      <span style={{ fontSize: '0.75rem', backgroundColor: '#e2e8f0', padding: '2px 6px', borderRadius: '4px', color: '#4a5568', fontWeight: 'bold' }}>
+                        Nicho: {item.codigo}
+                      </span>
+                    )}
+                  </div>
+
+                  {item.tipo === 'Socio' && item.difuntosLista && item.difuntosLista.length > 0 && (
+                    <div style={{ fontSize: '0.8rem', color: '#718096' }}>
+                      <strong>Difunto(s):</strong> {item.difuntosLista.map(d => d.nombre).join(', ')}
+                    </div>
+                  )}
+                  {item.tipo === 'Socio' && (!item.difuntosLista || item.difuntosLista.length === 0) && item.codigo && (
+                    <div style={{ fontSize: '0.8rem', color: '#718096', fontStyle: 'italic' }}>
+                      Nicho vacío (Sin difunto asignado)
+                    </div>
+                  )}
+
+                  {item.tipo === 'Difunto' && (
+                    <div style={{ fontSize: '0.8rem', color: '#718096' }}>
+                      <strong>Titular:</strong> {item.responsable}
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
