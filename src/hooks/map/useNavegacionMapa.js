@@ -92,7 +92,8 @@ export const useNavegacionMapa = ({
                         // Obtener datos completos para el popup (aunque no haya geometría)
                         const datosCompletos = await obtenerDatosCompletoNicho({ codigo });
                         const datosFinal = mergeConDatosExternos(datosCompletos, codigo);
-                        if (onUpdatePopup) onUpdatePopup(datosFinal);
+                        // Añadir flag para indicar que es una ubicación aproximada en el popup
+                        if (onUpdatePopup) onUpdatePopup({ ...datosFinal, esUbicacionAproximada: true });
 
                         // Buscar geometría del Bloque
                         if (codigoBloque) {
