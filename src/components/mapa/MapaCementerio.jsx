@@ -147,7 +147,9 @@ const MapaCementerio = ({
     setDatosPopup(null);
     popupOverlayRef.current?.setPosition(undefined);
     sources.resaltado.clear();
+    sources.bloque.clear(); // Limpiar el bloque resaltado en caso de ser "ubicación aproximada"
     if (alDeseleccionarNicho) alDeseleccionarNicho();
+    if (alDeseleccionarBloque) alDeseleccionarBloque();
   };
 
   const cerrarBloque = () => {
