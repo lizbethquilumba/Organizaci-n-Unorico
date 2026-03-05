@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, Layers, Map as MapIcon, Eye, EyeOff, Sparkles, MapPin, Info, Navigation, Grid3X3, FileText, CheckCircle, AlertTriangle, AlertCircle, Check, X } from 'lucide-react';
 import { supabase } from '../../api/supabaseClient';
 import { jsPDF } from 'jspdf';
@@ -34,6 +34,8 @@ const Sidebar = ({
   const [sectorSeleccionado, setSectorSeleccionado] = useState('');
   const [bloquesDelSector, setBloquesDelSector] = useState([]);
   const [bloquesSeleccionados, setBloquesSeleccionados] = useState([]);
+  const [dropdownBloqueOpen, setDropdownBloqueOpen] = useState(false);
+  const bloqueDropdownRef = useRef(null);
 
   const [capasVisibles, setCapasVisibles] = useState({
     'cementerio_general': true,
@@ -43,6 +45,17 @@ const Sidebar = ({
   });
 
   const [mensajeBusqueda, setMensajeBusqueda] = useState(null);
+
+  // Cerrar dropdown de bloques al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (bloqueDropdownRef.current && !bloqueDropdownRef.current.contains(e.target)) {
+        setDropdownBloqueOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // --- LÓGICA DE SIMBOLOGÍA (COLORES) ---
   // --- LÓGICA DE SIMBOLOGÍA (COLORES) ---
@@ -700,22 +713,49 @@ const Sidebar = ({
             {sectores.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
 
-          <select value={bloqueActual} onChange={(e) => {
-            const codigo = e.target.value;
-            setBloqueActual(codigo);
-            const b = bloques.find(x => x.codigo === codigo);
-            alSeleccionarBloque(codigo ? { codigo, nombre: b?.nombre } : null);
-          }} className="form-select" disabled={!sectorFiltro}>
-            <option value="">-- Seleccione un bloque --</option>
-            {bloques
-              .filter(b => {
-                if (!sectorFiltro || b.sector !== sectorFiltro) return false;
-                // Exclusión específica solicitada: Bloque 04 en CAPILLA
-                if (sectorFiltro === 'CAPILLA' && (b.nombre === 'Bloque 04' || b.codigo === 'B-20')) return false;
-                return true;
-              })
-              .map(b => <option key={b.codigo} value={b.codigo}>({b.codigo}) {b.nombre}</option>)}
-          </select>
+          {/* Custom dropdown para bloques - siempre abre hacia abajo */}
+          {(() => {
+            const filteredBloques = bloques.filter(b => {
+              if (!sectorFiltro || b.sector !== sectorFiltro) return false;
+              if (sectorFiltro === 'CAPILLA' && (b.nombre === 'Bloque 04' || b.codigo === 'B-20')) return false;
+              return true;
+            });
+            const selectedBloque = filteredBloques.find(b => b.codigo === bloqueActual);
+            return (
+              <div className="custom-select-wrapper" ref={bloqueDropdownRef}>
+                <div
+                  className={`form-select custom-select-trigger${!sectorFiltro ? ' disabled' : ''}`}
+                  onClick={() => sectorFiltro && setDropdownBloqueOpen(o => !o)}
+                >
+                  <span>{selectedBloque ? `(${selectedBloque.codigo}) ${selectedBloque.nombre}` : '-- Seleccione un bloque --'}</span>
+                  <span className="custom-select-arrow">{dropdownBloqueOpen ? '▲' : '▼'}</span>
+                </div>
+                {dropdownBloqueOpen && sectorFiltro && (
+                  <div className="custom-select-options">
+                    <div
+                      className="custom-select-option"
+                      onClick={() => { setBloqueActual(''); alSeleccionarBloque(null); setDropdownBloqueOpen(false); }}
+                    >
+                      -- Seleccione un bloque --
+                    </div>
+                    {filteredBloques.map(b => (
+                      <div
+                        key={b.codigo}
+                        className={`custom-select-option${b.codigo === bloqueActual ? ' selected' : ''}`}
+                        onClick={() => {
+                          setBloqueActual(b.codigo);
+                          alSeleccionarBloque({ codigo: b.codigo, nombre: b.nombre });
+                          setDropdownBloqueOpen(false);
+                        }}
+                      >
+                        ({b.codigo}) {b.nombre}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
           {/* Botón de quitar filtro removido intencionalmente */}
         </section>
 
